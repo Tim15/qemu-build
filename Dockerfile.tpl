@@ -1,7 +1,7 @@
 FROM debian:jessie
 
-ENV QEMU_VERSION 2.5.0-resin-rc3
-ENV QEMU_SHA256 035ea5ad381d1ba63a11a0281c00d35743ce8098adc4015c75cfb8e311624fa4
+ENV QEMU_VERSION #{QEMU_VERSION}
+ENV QEMU_SHA256 #{QEMU_SHA256}
 
 RUN apt-get -q update \
 	&& apt-get -qqy install \
@@ -10,10 +10,11 @@ RUN apt-get -q update \
 		zlib1g-dev \
 	&& mkdir /output
 
-RUN curl -SL https://codeload.github.com/resin-io/qemu/tar.gz/v${QEMU_VERSION} -o qemu-${QEMU_VERSION}.tar.gz \
+RUN #{CURL_COMMAND} \
 	&& echo "${QEMU_SHA256}  qemu-${QEMU_VERSION}.tar.gz" > qemu-${QEMU_VERSION}.tar.gz.sha256sum \
 	&& sha256sum -c qemu-${QEMU_VERSION}.tar.gz.sha256sum \
-	&& tar -xzf qemu-${QEMU_VERSION}.tar.gz \
+	&& mkdir /qemu-${QEMU_VERSION} \
+	&& tar -xzf qemu-${QEMU_VERSION}.tar.gz -C /qemu-${QEMU_VERSION} --strip-components=1 \
 	&& rm qemu-${QEMU_VERSION}.tar.gz*
 
 WORKDIR /qemu-${QEMU_VERSION}
