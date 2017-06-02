@@ -6,7 +6,7 @@ set -o errexit
 BINARY_NAME="qemu-$TARGET-static"
 PACKAGE_NAME="qemu-$QEMU_VERSION-$TARGET"
 
-./configure --target-list="$TARGET-linux-user" --static \
+./configure --target-list="$TARGET-linux-user" --static --extra-cflags="-DCONFIG_RTNETLINK" \
 	&& make -j $(nproc) \
 	&& strip "$TARGET-linux-user/qemu-$TARGET" \
 	&& mkdir -p "$PACKAGE_NAME" \
@@ -32,10 +32,14 @@ cat > request.json <<-EOF
     "prerelease": false
 }
 EOF
-curl --data "@request.json" --header "Content-Type:application/json" https://api.github.com/repos/$ACCOUNT/$REPO/releases?access_token=$ACCESS_TOKEN -o response.json
+curl --data "@request.json" --header "Content-Type:application/json" \
+	"https://api.github.com/repos/$ACCOUNT/$REPO/releases?access_token=$ACCESS_TOKEN" \
+	-o response.json
 # Parse response
-RELEASE_ID=$(cat response.json | ./jq '.id')
+RELEASE_ID=$(cat response.json | jq '.id')
 echo "RELEASE_ID=$RELEASE_ID"
 
 # Upload data
-curl -H "Authorization:token $ACCESS_TOKEN" -H "Content-Type:application/x-gzip" --data-binary "@$PACKAGE_NAME.tar.gz" https://uploads.github.com/repos/$ACCOUNT/$REPO/releases/$RELEASE_ID/assets?name=$PACKAGE_NAME.tar.gz
+curl -H "Authorization:token $ACCESS_TOKEN" -H "Content-Type:application/x-gzip" \
+	--data-binary "@$PACKAGE_NAME.tar.gz" \
+	"https://uploads.github.com/repos/$ACCOUNT/$REPO/releases/$RELEASE_ID/assets?name=$PACKAGE_NAME.tar.gz"
