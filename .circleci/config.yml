@@ -6,4 +6,4 @@ jobs:
     steps:
       - checkout
       - setup_remote_docker
-      - run: ./automation/build.sh
+      - run: pwd && ls && ./automation/build.sh
