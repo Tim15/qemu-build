@@ -1,0 +1,9 @@
+version: 2
+jobs:
+  build:
+    docker:
+      - image: docker/docker:17.06
+    steps:
+      - checkout
+      - setup_remote_docker
+      - ./automation/build.sh
